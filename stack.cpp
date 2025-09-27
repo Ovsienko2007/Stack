@@ -1,6 +1,6 @@
 #include "stack.h"
 
-static void print_error(error_t error, FILE *stream);
+static void print_error(error_t error, FILE *stream)  __attribute__((unused));
 
 static error_t stack_verify(stack_t *stack, verify_mod check_type = standart);
 
@@ -99,9 +99,10 @@ stackElemType pop_stack(stack_t *stack, error_t *error){
     return stack->data[stack->size];
 }
 
-void print_dump(stack_t *stack, error_t error, error_position error_pos){
+void print_dump([[maybe_unused]] stack_t *stack, [[maybe_unused]] error_t error,
+                [[maybe_unused]] error_position error_pos){
 #ifdef SHOW_DUMP
-#ifndef REDIRECT_STDOUT
+#ifdef CONSOLE_OUTPUT
     FILE *stream = stdout;
 #else 
     FILE *stream = fopen("dump.txt", "a");
@@ -150,7 +151,7 @@ void print_dump(stack_t *stack, error_t error, error_position error_pos){
         fprintf(stream, CONSOLE_RESET "   }\n}\n");
     }
 
-#ifdef REDIRECT_STDOUT
+#ifndef CONSOLE_OUTPUT
     fclose(stream);
 #endif
 #endif

@@ -67,6 +67,6 @@ void push_stack(stack_t *stack, stackElemType new_elem, error_t *error = NULL);
 
 stackElemType pop_stack(stack_t *stack, error_t *error = NULL);
 
-void print_dump([[maybe_unused]] stack_t *stack, [[maybe_unused]]  error_t error, [[maybe_unused]]  error_position error_pos);
+void print_dump(stack_t *stack, error_t error, error_position error_pos);
 
 #endif
