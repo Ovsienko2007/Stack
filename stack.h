@@ -32,7 +32,9 @@ enum error_t{
     size_less_then_zero     = 4,
     capacity_less_then_size = 5,
     size_zero               = 6,
-    not_null_data_ptr       = 7
+    not_null_data_ptr       = 7,
+    left_canary_death       = 8,
+    right_canary_death      = 9
 };
 
 enum verify_mod{
@@ -68,5 +70,7 @@ void push_stack(stack_t *stack, stackElemType new_elem, error_t *error = NULL);
 stackElemType pop_stack(stack_t *stack, error_t *error = NULL);
 
 void print_dump(stack_t *stack, error_t error, error_position error_pos);
+
+void print_error(error_t error, FILE *stream = stdout);
 
 #endif

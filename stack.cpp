@@ -1,15 +1,13 @@
 #include "stack.h"
 
-static void print_error(error_t error, FILE *stream)  __attribute__((unused));
-
 static error_t stack_verify(stack_t *stack, verify_mod check_type = standart);
 
 int init_stack(stack_t *stack, error_t *error){
     if (stack_verify(stack, init_mod)){
         if (error){
-            *error = stack_verify(stack);
+            *error = stack_verify(stack, init_mod);
         }
-        DUMP(stack, stack_verify(stack));
+        DUMP(stack, stack_verify(stack, init_mod));
         return 1;
     }
     
@@ -81,9 +79,9 @@ void push_stack(stack_t *stack, stackElemType new_elem, error_t *error){
 stackElemType pop_stack(stack_t *stack, error_t *error){
     if (stack_verify(stack, check_null_size)){
         if (error){
-            *error = stack_verify(stack);
+            *error = stack_verify(stack, check_null_size);
         }
-        DUMP(stack, stack_verify(stack));
+        DUMP(stack, stack_verify(stack, check_null_size));
         return 0;
     }
 
@@ -127,28 +125,31 @@ void print_dump([[maybe_unused]] stack_t *stack, [[maybe_unused]] error_t error,
 
         fprintf(stream, "  size:     %d\n", stack->size);
         fprintf(stream, "  capacity: %d\n", stack->capacity);
-        fprintf(stream, "  data [0x%p]{\n" , stack->data);
+        
+        if (stack->data != NULL){
+            fprintf(stream, "  data [0x%p]{\n" , stack->data);
 
-        for (int stack_position = 0; stack_position < stack->capacity + 2; stack_position++){
-            if (stack_position == 1){
-                fprintf(stream, "%s", CONSOLE_BLUE);
+            for (int stack_position = 0; stack_position < stack->capacity + 2; stack_position++){
+                if (stack_position == 1){
+                    fprintf(stream, "%s", CONSOLE_BLUE);
+                }
+                if (stack_position == stack->size + 1 || stack->size < 0){
+                    fprintf(stream, "%s", CONSOLE_PIRPLE);
+                }
+                if (stack_position == 0 || stack_position == stack->capacity + 1){
+                    fprintf(stream, "%s", CONSOLE_YELLOW);
+                    fprintf(stream, "      [canary]\t %#12X\n", stack->data[stack_position]);
+                }
+                else if (stack_position < stack->size + 1){
+                    fprintf(stream, "    * [%d]\t %12d\n", stack_position - 1, stack->data[stack_position]);
+                }
+                else{
+                    fprintf(stream, "      [%d]\t %12d (poision)\n", stack_position - 1, stack->data[stack_position]);
+                }
             }
-            if (stack_position == stack->size + 1){
-                fprintf(stream, "%s", CONSOLE_PIRPLE);
-            }
-            if (stack_position == 0 || stack_position == stack->capacity + 1){
-                fprintf(stream, "%s", CONSOLE_YELLOW);
-                fprintf(stream, "      [bird]\t %#12X\n", stack->data[stack_position]);
-            }
-            else if (stack_position < stack->size + 1){
-                fprintf(stream, "    * [%d]\t %12d\n", stack_position - 1, stack->data[stack_position]);
-            }
-            else{
-                fprintf(stream, "      [%d]\t %12d (poision)\n", stack_position - 1, stack->data[stack_position]);
-            }
+            fprintf(stream, CONSOLE_RESET "   }\n");
         }
-
-        fprintf(stream, CONSOLE_RESET "   }\n}\n");
+        fprintf(stream, "}\n");
     }
 
 #ifndef CONSOLE_OUTPUT
@@ -157,7 +158,7 @@ void print_dump([[maybe_unused]] stack_t *stack, [[maybe_unused]] error_t error,
 #endif
 }
 
-static void print_error(error_t error, FILE *stream){
+void print_error(error_t error, FILE *stream){
     if (stream == NULL) return;
 
     switch (error){
@@ -183,7 +184,14 @@ static void print_error(error_t error, FILE *stream){
             fprintf(stream, "Zero size\n");
             break;
         case not_null_data_ptr:
-            fprintf(stream, "not null data ptr");
+            fprintf(stream, "not null data ptr\n");
+            break;
+        case left_canary_death:
+            fprintf(stream, "The left canary was killed!\n");
+            break;
+        case right_canary_death:
+            fprintf(stream, "The right canary was killed!\n");
+            break;
         default:
             break;
     }
@@ -195,12 +203,15 @@ static error_t stack_verify(stack_t *stack, verify_mod check_type){
     if (check_type == init_mod){
         if (stack->data != NULL)                                return not_null_data_ptr;
     } else{
+        if (stack->data == NULL)                                return null_data_ptr;
         if (stack->capacity <= 0)                               return capacity_less_then_zero;
         if (stack->size < 0)                                    return size_less_then_zero;
         if (stack->size >= stack->capacity)                     return capacity_less_then_size;
+        if (stack->data[0] != bird)                             return left_canary_death;
+        if (stack->data[stack->capacity + 1] != bird)           return right_canary_death;
     }
 
-    if (check_type == check_null_size && stack->size == 0)  return size_zero;
+    if (check_type == check_null_size && stack->size == 0) return size_zero;
 
     return no_error;
 }

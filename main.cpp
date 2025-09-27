@@ -5,9 +5,8 @@ int main(){
     init_stack(&stack);
 
     for (int i = 0; i < 16; i++){
-        push_stack(&stack, i);
-        DUMP(&stack, no_error);
+        pop_stack(&stack);
     }
-    
+
     return 0;
 }
