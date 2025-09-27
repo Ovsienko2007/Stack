@@ -4,14 +4,9 @@ int main(){
     stack_t stack = {};
     init_stack(&stack);
 
-    for (int i = 0; i < 2; i++){
+    for (int i = 0; i < 16; i++){
         push_stack(&stack, i);
-    }
-
-    printf("%d %d\n", stack.capacity, stack.size);
-
-    for (int i = 0; i < 3; i++){
-        printf("%d ", pop_stack(&stack));
+        DUMP(&stack, no_error);
     }
     
     return 0;

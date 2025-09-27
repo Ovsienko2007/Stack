@@ -7,12 +7,12 @@ CFLAGS = -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef \
    -Wignored-qualifiers -Wlogical-op -Wno-missing-field-initializers\
    -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo\
    -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits\
-   -Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE -DCOLOR_PRINT
+   -Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE
    
 OBJECTS = main.o stack.o
 EXECUTABLE_NAME = main.exe
 DIR_BUILD = Build
-CFLAGSH = -DCONSOLE
+CFLAGSH = -DSHOW_DUMP -DCONSOLE_OUTPUT
 
 all: $(EXECUTABLE_NAME)
 

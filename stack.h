@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef CONSOLE
+#ifdef CONSOLE_OUTPUT
 
 #define CONSOLE_RED        "\033[31m"
 #define CONSOLE_YELLOW     "\033[33m"
@@ -22,27 +22,23 @@
 
 #endif
 
-
 #define DUMP(stack, error) print_dump(stack, error, error_position {__FILE__, __FUNCTION__,  __LINE__})
 
-/**
- *no_error                = 0,
- *null_ptr                = 1,
- *null_data               = 2,
- *init_err                = 3,
- *capacity_less_then_zero = 4,
- *size_less_then_zero     = 5,
- *capacity_less_then_size = 6,
- */
 enum error_t{
     no_error                = 0,
     null_stack_ptr          = 1,
     null_data_ptr           = 2,
-    init_err                = 3,
-    capacity_less_then_zero = 4,
-    size_less_then_zero     = 5,
-    capacity_less_then_size = 6,
-    size_zero               = 7
+    capacity_less_then_zero = 3,
+    size_less_then_zero     = 4,
+    capacity_less_then_size = 5,
+    size_zero               = 6,
+    not_null_data_ptr       = 7
+};
+
+enum verify_mod{
+    standart        = 0,
+    check_null_size = 1,
+    init_mod        = 2
 };
 
 struct error_position{
@@ -59,14 +55,18 @@ struct stack_t{
     stackElemType *data;
 };
 
+const int bird = 0xDEADBEEF;
+
 const int startStackSize = 16;
 
 int init_stack(stack_t *stack, error_t *error = NULL);
+
+int destroy_stack(stack_t *stack, error_t *error = NULL);
 
 void push_stack(stack_t *stack, stackElemType new_elem, error_t *error = NULL);
 
 stackElemType pop_stack(stack_t *stack, error_t *error = NULL);
 
-void print_dump(stack_t *stack, error_t error, error_position error_pos);
+void print_dump([[maybe_unused]] stack_t *stack, [[maybe_unused]]  error_t error, [[maybe_unused]]  error_position error_pos);
 
 #endif
