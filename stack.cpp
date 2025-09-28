@@ -100,7 +100,7 @@ stackElemType pop_stack(stack_t *stack, error_t *error){
         STANDART_DUMP(stack, stack_verify(stack));
         return 0;
     }
-    return stack->data[stack->size];
+    return stack->data[stack->size + 1];
 }
 
 void show_dump([[maybe_unused]] stack_t *stack, [[maybe_unused]] error_t error,
