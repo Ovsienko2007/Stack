@@ -3,26 +3,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
-#ifdef CONSOLE_OUTPUT
-
-#define CONSOLE_RED        "\033[31m"
-#define CONSOLE_YELLOW     "\033[33m"
-#define CONSOLE_BLUE       "\033[34m"
-#define CONSOLE_PIRPLE     "\033[35m"
-#define CONSOLE_RESET      "\033[39m"
-
-#else 
-
-#define CONSOLE_RED        ""
-#define CONSOLE_YELLOW     ""
-#define CONSOLE_BLUE       ""
-#define CONSOLE_PIRPLE     ""
-#define CONSOLE_RESET      ""
-
-#endif
-
-#define DUMP(stack, error) print_dump(stack, error, error_position {__FILE__, __FUNCTION__,  __LINE__})
+#define STANDART_DUMP(stack, error) show_dump(stack, error, error_position {__FILE__, __FUNCTION__,  __LINE__}, standart_mod)
+#define USER_DUMP(stack, error)  show_dump(stack, error, error_position {__FILE__, __FUNCTION__,  __LINE__}, user_mod)
 
 enum error_t{
     no_error                = 0,
@@ -43,6 +27,11 @@ enum verify_mod{
     init_mod        = 2
 };
 
+enum dump_mod{
+    standart_mod    = 0,
+    user_mod        = 2,
+};
+
 struct error_position{
     const char *file;
     const char *func;
@@ -57,6 +46,14 @@ struct stack_t{
     stackElemType *data;
 };
 
+struct dump_colors{
+    const char  *red;
+    const char  *yellow;
+    const char  *blue;
+    const char  *pirple;
+    const char  *reset;
+};
+
 const int bird = 0xDEADBEEF;
 
 const int startStackSize = 16;
@@ -69,7 +66,7 @@ void push_stack(stack_t *stack, stackElemType new_elem, error_t *error = NULL);
 
 stackElemType pop_stack(stack_t *stack, error_t *error = NULL);
 
-void print_dump(stack_t *stack, error_t error, error_position error_pos);
+void show_dump(stack_t *stack, error_t error, error_position error_pos, dump_mod mod);
 
 void print_error(error_t error, FILE *stream = stdout);
 

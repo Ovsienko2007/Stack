@@ -2,12 +2,18 @@
 
 static error_t stack_verify(stack_t *stack, verify_mod check_type = standart);
 
+static void print_dump(FILE *stream, stack_t *stack,
+                       error_t error, error_position error_pos, dump_colors colors) __attribute__((unused));
+
+static void del_colors_input(dump_colors *colors) __attribute__((unused));
+static void add_colors_input(dump_colors *colors) __attribute__((unused));
+
 int init_stack(stack_t *stack, error_t *error){
     if (stack_verify(stack, init_mod)){
         if (error){
             *error = stack_verify(stack, init_mod);
         }
-        DUMP(stack, stack_verify(stack, init_mod));
+        STANDART_DUMP(stack, stack_verify(stack, init_mod));
         return 1;
     }
     
@@ -24,7 +30,7 @@ int init_stack(stack_t *stack, error_t *error){
         if (error){
             *error = stack_verify(stack);
         }
-        DUMP(stack, stack_verify(stack));
+        STANDART_DUMP(stack, stack_verify(stack));
         return 1;
     }
 
@@ -36,7 +42,7 @@ int destroy_stack(stack_t *stack, error_t *error){
         if (error){
             *error = stack_verify(stack);
         }
-        DUMP(stack, stack_verify(stack));
+        STANDART_DUMP(stack, stack_verify(stack));
         return 1;
     }
 
@@ -53,7 +59,7 @@ void push_stack(stack_t *stack, stackElemType new_elem, error_t *error){
         if (error){
             *error = stack_verify(stack);
         }
-        DUMP(stack, stack_verify(stack));
+        STANDART_DUMP(stack, stack_verify(stack));
         return;
     }
 
@@ -71,7 +77,7 @@ void push_stack(stack_t *stack, stackElemType new_elem, error_t *error){
         if (error){
             *error = stack_verify(stack);
         }
-        DUMP(stack, stack_verify(stack));
+        STANDART_DUMP(stack, stack_verify(stack));
         return;
     }
 }
@@ -81,7 +87,7 @@ stackElemType pop_stack(stack_t *stack, error_t *error){
         if (error){
             *error = stack_verify(stack, check_null_size);
         }
-        DUMP(stack, stack_verify(stack, check_null_size));
+        STANDART_DUMP(stack, stack_verify(stack, check_null_size));
         return 0;
     }
 
@@ -91,34 +97,60 @@ stackElemType pop_stack(stack_t *stack, error_t *error){
         if (error){
             *error = stack_verify(stack);
         }
-        DUMP(stack, stack_verify(stack));
+        STANDART_DUMP(stack, stack_verify(stack));
         return 0;
     }
     return stack->data[stack->size];
 }
 
-void print_dump([[maybe_unused]] stack_t *stack, [[maybe_unused]] error_t error,
-                [[maybe_unused]] error_position error_pos){
-#ifdef SHOW_DUMP
-#ifdef CONSOLE_OUTPUT
-    FILE *stream = stdout;
-#else 
-    FILE *stream = fopen("dump.txt", "a");
-#endif
-    setbuf(stdout, NULL);
+void show_dump([[maybe_unused]] stack_t *stack, [[maybe_unused]] error_t error,
+                [[maybe_unused]] error_position error_pos, [[maybe_unused]] dump_mod mod){
+    bool show_dump = false;
 
+#ifdef SHOW_DUMP
+    show_dump = true;
+#endif
+
+    if (mod == user_mod || show_dump){
+        FILE *stream = stdout;
+        dump_colors colors = {};
+        add_colors_input(&colors);
+
+        if (!isatty(STDOUT_FILENO)) {
+            del_colors_input(&colors);
+        }
+
+#ifndef CONSOLE_OUTPUT
+        if (mod == standart_mod){
+            stream = fopen("dump.txt", "a");
+            del_colors_input(&colors);
+        }
+#endif
+        setbuf(stream, NULL);
+        print_dump(stream, stack, error, error_pos, colors);
+
+#ifndef CONSOLE_OUTPUT
+        if (mod == standart_mod){
+            fclose(stream);
+        }
+#endif
+    }
+}
+
+static void print_dump(FILE *stream, stack_t *stack, error_t error, error_position error_pos, dump_colors colors){
     static int nam_call = 0;
     nam_call++;
 
     if (stream == NULL) return;
 
-    fprintf(stream, CONSOLE_RED "StackDump called from %s:%d from func %s\n" CONSOLE_RESET,
-           error_pos.file, error_pos.line, error_pos.func);
-    fprintf(stream , CONSOLE_YELLOW "The %d call\n" CONSOLE_RESET, nam_call);
-
-    fprintf(stream, CONSOLE_RED "Error: ");
-    print_error(error, stream);
-    fprintf(stream, "%s", CONSOLE_RESET);
+    fprintf(stream, "%sStackDump called from %s:%d from func %s\n%s",
+           colors.red, error_pos.file, error_pos.line, error_pos.func, colors.reset);
+    fprintf(stream , "%sThe %d call\n%s", colors.yellow, nam_call, colors.reset);
+    if (error != no_error){
+        fprintf(stream, "%sError: ", colors.red);
+        print_error(error, stream);
+        fprintf(stream, "%s", colors.reset);
+    }
 
     if (stack != NULL){
         fprintf(stream, "Stack [0x%p]{\n", stack);
@@ -131,13 +163,13 @@ void print_dump([[maybe_unused]] stack_t *stack, [[maybe_unused]] error_t error,
 
             for (int stack_position = 0; stack_position < stack->capacity + 2; stack_position++){
                 if (stack_position == 1){
-                    fprintf(stream, "%s", CONSOLE_BLUE);
+                    fprintf(stream, "%s", colors.blue);
                 }
                 if (stack_position == stack->size + 1 || stack->size < 0){
-                    fprintf(stream, "%s", CONSOLE_PIRPLE);
+                    fprintf(stream, "%s", colors.pirple);
                 }
                 if (stack_position == 0 || stack_position == stack->capacity + 1){
-                    fprintf(stream, "%s", CONSOLE_YELLOW);
+                    fprintf(stream, "%s", colors.yellow);
                     fprintf(stream, "      [canary]\t %#12X\n", stack->data[stack_position]);
                 }
                 else if (stack_position < stack->size + 1){
@@ -147,15 +179,26 @@ void print_dump([[maybe_unused]] stack_t *stack, [[maybe_unused]] error_t error,
                     fprintf(stream, "      [%d]\t %12d (poision)\n", stack_position - 1, stack->data[stack_position]);
                 }
             }
-            fprintf(stream, CONSOLE_RESET "   }\n");
+            fprintf(stream, "%s   }\n", colors.reset);
         }
         fprintf(stream, "}\n");
     }
+}
 
-#ifndef CONSOLE_OUTPUT
-    fclose(stream);
-#endif
-#endif
+static void del_colors_input(dump_colors *colors){
+    colors->red    = "";
+    colors->yellow = "";
+    colors->blue   = "";
+    colors->pirple = "";
+    colors->reset  = "";
+}
+
+static void add_colors_input(dump_colors *colors){
+    colors->red    = "\033[31m";
+    colors->yellow = "\033[33m";
+    colors->blue   = "\033[34m";
+    colors->reset  = "\033[39m";
+    colors->pirple = "\033[35m";
 }
 
 void print_error(error_t error, FILE *stream){
