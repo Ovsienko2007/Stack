@@ -39,6 +39,7 @@ int init_stack(stack_t *stack, error_t *error){
 
 int destroy_stack(stack_t *stack, error_t *error){
     if (stack == NULL){
+        *error = null_stack_ptr;
         STANDART_DUMP(stack, stack_verify(stack));
         return 1;
     }
