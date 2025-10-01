@@ -38,10 +38,7 @@ int init_stack(stack_t *stack, error_t *error){
 }
 
 int destroy_stack(stack_t *stack, error_t *error){
-    if (error){
-        *error = stack_verify(stack);
-    }
-    if (stack_verify(stack)){
+    if (stack == NULL){
         STANDART_DUMP(stack, stack_verify(stack));
         return 1;
     }
@@ -223,7 +220,7 @@ void print_error(error_t error, FILE *stream){
         case capacity_less_then_size:
             fprintf(stream, "Capacity less then size\n");
             break;
-        case size_zero:
+        case data_size_zero:
             fprintf(stream, "Zero size\n");
             break;
         case not_null_data_ptr:
@@ -254,7 +251,7 @@ static error_t stack_verify(stack_t *stack, verify_mod check_type){
         if (stack->data[stack->capacity + 1] != bird)           return right_canary_death;
     }
 
-    if (check_type == check_null_size && stack->size == 0) return size_zero;
+    if (check_type == check_null_size && stack->size == 0) return data_size_zero;
 
     return no_error;
 }

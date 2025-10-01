@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 #define STANDART_DUMP(stack, error) show_dump(stack, error, error_position {__FILE__, __FUNCTION__,  __LINE__}, standart_mod)
-#define USER_DUMP(stack, error)  show_dump(stack, error, error_position {__FILE__, __FUNCTION__,  __LINE__}, user_mod)
+#define USER_DUMP(stack, error)     show_dump(stack, error, error_position {__FILE__, __FUNCTION__,  __LINE__}, user_mod)
 
 enum error_t{
     no_error                = 0,
@@ -15,7 +15,7 @@ enum error_t{
     capacity_less_then_zero = 3,
     size_less_then_zero     = 4,
     capacity_less_then_size = 5,
-    size_zero               = 6,
+    data_size_zero          = 6,
     not_null_data_ptr       = 7,
     left_canary_death       = 8,
     right_canary_death      = 9
