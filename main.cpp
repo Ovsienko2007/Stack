@@ -7,7 +7,7 @@ int main(){
     for (int i = 0; i < 2; i++){
         push_stack(&stack, i);
     }
-    USER_DUMP(&stack, no_error);
+    USER_DUMP(&stack);
 
     for (int i = 0; i < 3; i++){
         pop_stack(&stack);

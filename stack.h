@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 #define INTERNAL_DUMP(stack, error) show_dump(stack, error, error_position {__FILE__, __FUNCTION__,  __LINE__}, standart_mod)
-#define USER_DUMP(stack, error)     show_dump(stack, error, error_position {__FILE__, __FUNCTION__,  __LINE__}, user_mod)
+#define USER_DUMP(stack)     show_dump(stack, no_error, error_position {__FILE__, __FUNCTION__,  __LINE__}, user_mod)
 
 enum error_t{
     no_error                = 0,
