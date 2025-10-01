@@ -12,7 +12,7 @@ CFLAGS = -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef \
 OBJECTS = main.o stack.o
 EXECUTABLE_NAME = main.exe
 DIR_BUILD = Build
-CFLAGSH = -DSHOW_DUMP -DCONSOLE_OUTPUT
+CFLAGSH = -DSHOW_DUMP
 
 all: $(EXECUTABLE_NAME)
 

@@ -3,7 +3,7 @@
 static error_t stack_verify(stack_t *stack, verify_mod check_type = standart);
 
 static void print_dump(FILE *stream, stack_t *stack,
-                       error_t error, error_position error_pos, dump_colors colors) __attribute__((unused));
+                       error_t error, error_position error_pos, dump_colors colors);
 
 static void del_colors_input(dump_colors *colors) __attribute__((unused));
 static void add_colors_input(dump_colors *colors) __attribute__((unused));
@@ -13,7 +13,7 @@ int init_stack(stack_t *stack, error_t *error){
         *error = stack_verify(stack, init_mod);
     }
     if (stack_verify(stack, init_mod)){
-        STANDART_DUMP(stack, stack_verify(stack, init_mod));
+        INTERNAL_DUMP(stack, stack_verify(stack, init_mod));
         return 1;
     }
     
@@ -23,14 +23,14 @@ int init_stack(stack_t *stack, error_t *error){
         .data = (stackElemType *)calloc(startStackSize, sizeof(stackElemType))
     };
 
-    stack->data[0] = bird;
-    stack->data[startStackSize - 1] = bird;
+    stack->data[0] = cock;
+    stack->data[startStackSize - 1] = cock;
 
     if (error){
         *error = stack_verify(stack);
     }
     if (stack_verify(stack)){
-        STANDART_DUMP(stack, stack_verify(stack));
+        INTERNAL_DUMP(stack, stack_verify(stack));
         return 1;
     }
 
@@ -40,7 +40,7 @@ int init_stack(stack_t *stack, error_t *error){
 int destroy_stack(stack_t *stack, error_t *error){
     if (stack == NULL){
         *error = null_stack_ptr;
-        STANDART_DUMP(stack, stack_verify(stack));
+        INTERNAL_DUMP(stack, stack_verify(stack));
         return 1;
     }
 
@@ -57,7 +57,7 @@ void push_stack(stack_t *stack, stackElemType new_elem, error_t *error){
         *error = stack_verify(stack);
     }
     if (stack_verify(stack)){
-        STANDART_DUMP(stack, stack_verify(stack));
+        INTERNAL_DUMP(stack, stack_verify(stack));
         return;
     }
 
@@ -68,14 +68,14 @@ void push_stack(stack_t *stack, stackElemType new_elem, error_t *error){
         stack->capacity *= 2;
         stackElemType *new_data = (stackElemType *)realloc(stack->data, (2 + stack->capacity) * sizeof(stackElemType));
         stack->data = new_data;
-        stack->data[stack->capacity + 1] = bird;
+        stack->data[stack->capacity + 1] = cock;
     }
 
     if (error){
         *error = stack_verify(stack);
     }
     if (stack_verify(stack)){
-        STANDART_DUMP(stack, stack_verify(stack));
+        INTERNAL_DUMP(stack, stack_verify(stack));
         return;
     }
 }
@@ -85,7 +85,7 @@ stackElemType pop_stack(stack_t *stack, error_t *error){
         *error = stack_verify(stack, check_null_size);
     }
     if (stack_verify(stack, check_null_size)){
-        STANDART_DUMP(stack, stack_verify(stack, check_null_size));
+        INTERNAL_DUMP(stack, stack_verify(stack, check_null_size));
         return 0;
     }
 
@@ -95,44 +95,44 @@ stackElemType pop_stack(stack_t *stack, error_t *error){
         *error = stack_verify(stack);
     }
     if (stack_verify(stack)){
-        STANDART_DUMP(stack, stack_verify(stack));
+        INTERNAL_DUMP(stack, stack_verify(stack));
         return 0;
     }
     return stack->data[stack->size + 1];
 }
 
-void show_dump([[maybe_unused]] stack_t *stack, [[maybe_unused]] error_t error,
-                [[maybe_unused]] error_position error_pos, [[maybe_unused]] dump_mod mod){
+void show_dump(stack_t *stack, error_t error,
+                error_position error_pos, dump_mod mod){
     bool show_dump = false;
+    FILE *stream = stdout;
+    dump_colors colors = {};
 
 #ifdef SHOW_DUMP
     show_dump = true;
+    if (mod == standart_mod){
+        stream = fopen("dump.txt", "a");
+        del_colors_input(&colors);
+    }
 #endif
 
-    if (mod == user_mod || show_dump){
-        FILE *stream = stdout;
-        dump_colors colors = {};
+    if (mod == user_mod){
+        show_dump = true;
+        stream = stdout;
         add_colors_input(&colors);
 
         if (!isatty(STDOUT_FILENO)) {
             del_colors_input(&colors);
         }
-
-#ifndef CONSOLE_OUTPUT
-        if (mod == standart_mod){
-            stream = fopen("dump.txt", "a");
-            del_colors_input(&colors);
-        }
-#endif
-        setbuf(stream, NULL);
+    }
+    if (show_dump){
         print_dump(stream, stack, error, error_pos, colors);
+    }
 
-#ifndef CONSOLE_OUTPUT
+#ifdef SHOW_DUMP
         if (mod == standart_mod){
             fclose(stream);
         }
 #endif
-    }
 }
 
 static void print_dump(FILE *stream, stack_t *stack, error_t error, error_position error_pos, dump_colors colors){
@@ -248,8 +248,8 @@ static error_t stack_verify(stack_t *stack, verify_mod check_type){
         if (stack->capacity <= 0)                               return capacity_less_then_zero;
         if (stack->size < 0)                                    return size_less_then_zero;
         if (stack->size >= stack->capacity)                     return capacity_less_then_size;
-        if (stack->data[0] != bird)                             return left_canary_death;
-        if (stack->data[stack->capacity + 1] != bird)           return right_canary_death;
+        if (stack->data[0] != cock)                             return left_canary_death;
+        if (stack->data[stack->capacity + 1] != cock)           return right_canary_death;
     }
 
     if (check_type == check_null_size && stack->size == 0) return data_size_zero;

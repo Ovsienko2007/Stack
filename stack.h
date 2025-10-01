@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define STANDART_DUMP(stack, error) show_dump(stack, error, error_position {__FILE__, __FUNCTION__,  __LINE__}, standart_mod)
+#define INTERNAL_DUMP(stack, error) show_dump(stack, error, error_position {__FILE__, __FUNCTION__,  __LINE__}, standart_mod)
 #define USER_DUMP(stack, error)     show_dump(stack, error, error_position {__FILE__, __FUNCTION__,  __LINE__}, user_mod)
 
 enum error_t{
@@ -54,7 +54,7 @@ struct dump_colors{
     const char  *reset;
 };
 
-const int bird = 0xDEADBEEF;
+const int cock = 0xDEADBEEF;
 
 const int startStackSize = 16;
 
